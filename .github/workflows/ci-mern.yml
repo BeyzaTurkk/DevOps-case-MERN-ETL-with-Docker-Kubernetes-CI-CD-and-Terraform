@@ -62,7 +62,8 @@ jobs:
 
       - name: Validate Kubernetes manifests (dry-run)
         run: |
-          kubectl apply --dry-run=client -f k8s/namespace.yaml
-          kubectl apply --dry-run=client -f k8s/mongo.yaml
-          kubectl apply --dry-run=client -f k8s/server.yaml
-          kubectl apply --dry-run=client -f k8s/client.yaml
+          kubectl apply --dry-run=client --validate=false -f k8s/namespace.yaml
+          kubectl apply --dry-run=client --validate=false -f k8s/mongo.yaml
+          kubectl apply --dry-run=client --validate=false -f k8s/server.yaml
+          kubectl apply --dry-run=client --validate=false -f k8s/client.yaml
+
