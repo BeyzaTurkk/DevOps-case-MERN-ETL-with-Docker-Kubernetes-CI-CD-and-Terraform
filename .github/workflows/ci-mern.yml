@@ -16,10 +16,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set lowercase GHCR owner
+        shell: bash
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Optional: login to GHCR (push etmek istersen)
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -34,7 +37,7 @@ jobs:
           file: ./mern-project/server/Dockerfile
           push: false
           tags: |
-            ghcr.io/${{ github.repository_owner }}/devopscase-server:ci
+            ghcr.io/${{ env.OWNER_LC }}/devopscase-server:ci
 
       - name: Build client image
         uses: docker/build-push-action@v6
@@ -43,7 +46,7 @@ jobs:
           file: ./mern-project/client/Dockerfile
           push: false
           tags: |
-            ghcr.io/${{ github.repository_owner }}/devopscase-client:ci
+            ghcr.io/${{ env.OWNER_LC }}/devopscase-client:ci
 
   k8s-validate:
     runs-on: ubuntu-latest
