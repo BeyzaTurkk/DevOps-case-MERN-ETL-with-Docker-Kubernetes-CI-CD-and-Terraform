@@ -1,0 +1,21 @@
+services:
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+
+  server:
+    build: ./mern-project/server
+    environment:
+      - ATLAS_URI=mongodb://mongo:27017
+    depends_on:
+      - mongo
+    ports:
+      - "5050:5050"
+
+  client:
+    build: ./mern-project/client
+    depends_on:
+      - server
+    ports:
+      - "8080:80"

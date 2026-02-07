@@ -1,0 +1,65 @@
+name: CI - MERN (client + server)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Optional: login to GHCR (push etmek istersen)
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./mern-project/server
+          file: ./mern-project/server/Dockerfile
+          push: false
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/devopscase-server:ci
+
+      - name: Build client image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./mern-project/client
+          file: ./mern-project/client/Dockerfile
+          push: false
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/devopscase-client:ci
+
+  k8s-validate:
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.29.0
+
+      - name: Validate Kubernetes manifests (dry-run)
+        run: |
+          kubectl apply --dry-run=client -f k8s/namespace.yaml
+          kubectl apply --dry-run=client -f k8s/mongo.yaml
+          kubectl apply --dry-run=client -f k8s/server.yaml
+          kubectl apply --dry-run=client -f k8s/client.yaml

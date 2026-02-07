@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: etl-hourly
+  namespace: devopscase
+spec:
+  schedule: "0 * * * *"   
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: etl
+            image: devopscase-etl:latest
+            imagePullPolicy: IfNotPresent
