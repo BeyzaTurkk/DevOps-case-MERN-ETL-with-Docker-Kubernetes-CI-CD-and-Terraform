@@ -55,15 +55,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: v1.29.0
-
-      - name: Validate Kubernetes manifests (dry-run)
+      - name: Install kubeconform
         run: |
-          kubectl create --dry-run=client -f k8s/namespace.yaml
-          kubectl create --dry-run=client -f k8s/mongo.yaml
-          kubectl create --dry-run=client -f k8s/server.yaml
-          kubectl create --dry-run=client -f k8s/client.yaml
+          curl -L -o kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
+
+      - name: Validate Kubernetes manifests (schema validation)
+        run: |
+          kubeconform -strict -ignore-missing-schemas -summary \
+            -kubernetes-version 1.29.0 \
+            k8s/namespace.yaml k8s/mongo.yaml k8s/server.yaml k8s/client.yaml
 
