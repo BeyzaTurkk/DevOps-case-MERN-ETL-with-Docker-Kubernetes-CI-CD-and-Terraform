@@ -37,7 +37,7 @@ jobs:
           push: false
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/devopscase-etl:ci
-    k8s-validate-etl:
+  k8s-validate-etl:
     runs-on: ubuntu-latest
     needs: docker-build-etl
     steps:
